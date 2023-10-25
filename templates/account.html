@@ -1,0 +1,356 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{{ .CurrentUser.Username }}</title>
+        <style>
+            .divTableRow {
+                display: flex !important;
+            }
+            .divTableRow {
+                display: flex !important;
+            }
+            .divTableHead {
+                flex: 1 !important;
+            }
+            .divTableCell {
+                flex: 1 !important;
+            }
+            div.blueTable {
+                border: 1px solid #1C6EA4;
+                background-color: #EEEEEE;
+                width: 100%;
+                text-align: left;
+                border-collapse: collapse;
+            }
+            .divTable.blueTable .divTableCell, .divTable.blueTable .divTableHead {
+                border: 1px solid #AAAAAA;
+                padding: 3px 2px;
+            }
+            .divTable.blueTable .divTableBody .divTableCell {
+                font-size: 13px;
+            }
+            .divTable.blueTable .divTableRow:nth-child(even) {
+                background: #D0E4F5;
+            }
+            .divTable.blueTable .divTableHeading {
+                background: #1C6EA4;
+                background: -moz-linear-gradient(top, #5592bb 0%, #327cad 66%, #1C6EA4 100%);
+                background: -webkit-linear-gradient(top, #5592bb 0%, #327cad 66%, #1C6EA4 100%);
+                background: linear-gradient(to bottom, #5592bb 0%, #327cad 66%, #1C6EA4 100%);
+                border-bottom: 2px solid #444444;
+            }
+            .divTable.blueTable .divTableHeading .divTableHead {
+                font-size: 15px;
+                font-weight: bold;
+                color: #FFFFFF;
+                border-left: 2px solid #D0E4F5;
+            }
+            .divTable.blueTable .divTableHeading .divTableHead:first-child {
+                border-left: none;
+            }
+
+            .blueTable .tableFootStyle {
+                font-size: 14px;
+                font-weight: bold;
+                color: #FFFFFF;
+                background: #D0E4F5;
+                background: -moz-linear-gradient(top, #dcebf7 0%, #d4e6f6 66%, #D0E4F5 100%);
+                background: -webkit-linear-gradient(top, #dcebf7 0%, #d4e6f6 66%, #D0E4F5 100%);
+                background: linear-gradient(to bottom, #dcebf7 0%, #d4e6f6 66%, #D0E4F5 100%);
+                border-top: 2px solid #444444;
+            }
+            .blueTable .tableFootStyle {
+                font-size: 14px;
+            }
+            .blueTable .tableFootStyle .links {
+                text-align: right;
+            }
+            .blueTable .tableFootStyle .links a{
+                display: inline-block;
+                background: #1C6EA4;
+                color: #FFFFFF;
+                padding: 2px 8px;
+                border-radius: 5px;
+            }
+            .blueTable.outerTableFooter {
+                border-top: none;
+            }
+            .blueTable.outerTableFooter .tableFootStyle {
+                padding: 3px 5px;
+            }
+            /* HTMLtable.com */
+            .divTable{ display: table; }
+            .divTableRow { display: table-row; }
+            .divTableHeading { display: table-header-group;}
+            .divTableCell, .divTableHead { display: table-cell;}
+            .divTableHeading { display: table-header-group;}
+            .divTableFoot { display: table-footer-group;}
+            .divTableBody { display: table-row-group;}
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f4f4f4;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                /*justify-content: center;*/
+                align-items: center;
+                height: 100vh;
+            }
+
+            .account-container {
+                background: #fff;
+                padding: 20px;
+                border-radius: 5px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                position: fixed;
+                right: 0;
+                top: 0;
+            }
+
+
+
+            .account-container h2 {
+                text-align: center;
+            }
+
+            .account-details {
+                margin-top: 20px;
+            }
+
+            .account-user-list {
+                background: #fff;
+                padding: 20px;
+                border-radius: 5px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                width: 100%;
+                max-width: 900px;
+            }
+            input[readonly] {
+                background: transparent;
+                border: none !important;
+                width: 100%;
+            }
+            input[readonly]:focus {
+                background: transparent;
+                border: none !important;
+            }
+
+            .password-change {
+                margin-top: 20px;
+                background: #fff;
+                padding: 20px;
+                border-radius: 5px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                width: 100%;
+                max-width: 500px; /* Adjust the width as needed */
+            }
+
+            .password-change h3 {
+                text-align: center;
+            }
+
+            .password-change form {
+                text-align: center;
+            }
+
+            .password-change label {
+                display: block;
+                text-align: left;
+                margin-top: 10px;
+            }
+
+            .password-change input {
+                width: 100%;
+                padding: 8px;
+                margin-top: 5px;
+                border: 1px solid #ccc;
+                border-radius: 3px;
+            }
+
+            .password-change button {
+                background: #1C6EA4;
+                color: #fff;
+                padding: 10px 15px;
+                border: none;
+                border-radius: 5px;
+                margin-top: 10px;
+                cursor: pointer;
+            }
+
+            .input{
+                width: 100%;
+            }
+
+            /*.divTableCell input {*/
+            /*    width: 100%;*/
+            /*}*/
+        </style>
+    </head>
+    <body>
+    <div class="account-container">
+        <h2>Мой аккаунт</h2>
+        <div class="account-details">
+            <p><strong>Имя:</strong> {{ .CurrentUser.Username }}</p>
+            {{ if .CurrentUser.Admin }}
+            <p><strong>Роль:</strong> admin</p>
+            {{ else }}
+            <p><strong>Роль:</strong> user</p>
+            {{ end }}
+            <!-- Дополнительные сведения о пользователе можно добавить здесь -->
+        </div>
+        <form action="/logout" method="post">
+            <button type="submit">Выход</button>
+        </form>
+
+        <div class="password-change">
+            <h3>Изменить пароль</h3>
+            <form action="/update" method="post">
+                <input type="hidden" name="id" value="{{ .CurrentUser.ID }}">
+                <label for="currentPassword">Текущий пароль:</label>
+                <input type="password" id="currentPassword" name="currentPassword" >
+                <label for="newPassword">Новый пароль:</label>
+                <input type="password" id="newPassword" name="newPassword" required>
+                <button type="submit">Изменить пароль</button>
+            </form>
+
+            <div id="error-message" style="color: red; display: none;"></div>
+        </div>
+    </div>
+
+
+
+    {{ if .CurrentUser.Admin }}
+    <div class="account-user-list">
+        <div class="" style="display: flex; justify-content: space-between; align-items: center">
+            <h2>Список пользователей</h2>
+            <form action="/user/create" method="POST">
+                <input placeholder="Введите имя" name="login">
+                <input type="hidden" name="id" value="{{ .CurrentUser.ID }}">
+                <button id="postNewUser">
+                    Добавить пользователя
+                </button>
+            </form>
+        </div>
+    <div>
+        <div class="divTable blueTable">
+            <div class="divTableHeading">
+                <div class="divTableRow">
+                    <div class="divTableHead">ID</div>
+                    <div class="divTableHead">Логин</div>
+                    <div class="divTableHead">Блокировка</div>
+                    <div class="divTableHead">Ограничение</div>
+                    <div class="divTableHead">Роль</div>
+                    <div class="divTableHead"></div>
+                </div>
+            </div>
+            <div class="divTableBody">
+                {{ range .AllUsers.User }}
+                <form class="divTableRow" action="/admin" method="post">
+                    <div class="divTableCell">
+                        <input readonly name="id" value="{{ .ID }}">
+                    </div>
+                    <div class="divTableCell">
+                        <input class="input" name="login" value="{{ .Username }}">
+                    </div>
+                    <div class="divTableCell">
+                        <input type="checkbox" name="block" value="true" {{ if .Block }}checked{{ end }}>
+                    </div>
+                    <div class="divTableCell">
+                        <input type="checkbox" name="limit" value="true" {{ if .Limit }}checked{{ end }}>
+                    </div>
+                    {{ if .Admin }}
+                    <div class="divTableCell"> admin</div>
+                    {{ else }}
+                    <div class="divTableCell"> user</div>
+                    {{ end }}
+                    <div class="divTableCell">
+                            <button type="submit" onclick="handleButtonClick(event)">
+                            Сохранить
+                        </button>
+                    </div>
+                </form>
+                {{ end }}
+            </div>
+        </div>
+    </div>
+    </div>
+    {{ end }}
+
+    <script>
+        function handleButtonClick(event) {
+            event.preventDefault();
+
+            const form = event.target.closest('form');
+            const formData = new FormData(form);
+            console.log(formData)
+            fetch(form.action, {
+                method: form.method,
+                body: formData,
+            })
+            .then(response => {
+                if (response.ok) {
+                } else {
+                }
+            })
+            .catch(error => {
+            });
+        }
+
+        const postNewUser = document.querySelector('#postNewUser');
+        postNewUser.addEventListener('click', async function(event) {
+            event.preventDefault();
+
+            const form = event.target.closest('form');
+            const formData = new FormData(form);
+            console.log(formData)
+            try {
+                fetch(form.action, {
+                    method: form.method,
+                    body: formData,
+                })
+            } catch (err) {
+                console.error(err); // Правильно: вывод ошибки в консоль
+            }
+        });
+
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // Находим форму и элемент для сообщения об ошибке
+            var form = document.querySelector("form");
+            var errorMessage = document.getElementById("error-message");
+
+            // Добавляем обработчик отправки формы
+            form.addEventListener("submit", function(event) {
+                event.preventDefault();
+
+                var formData = new FormData(form);
+
+                // Отправляем данные на сервер с использованием AJAX
+                fetch("/update", {
+                    method: "POST",
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            // Если получен ответ с ошибкой, отображаем сообщение об ошибке на странице
+                            errorMessage.textContent = data.error;
+                            errorMessage.style.display = "block"; // Отображаем элемент
+                        } else {
+                            // В случае успеха, скрываем сообщение об ошибке (если оно было видимым)
+                            errorMessage.style.display = "none";
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Ошибка при отправке запроса:", error);
+                    });
+            });
+        });
+
+
+
+    </script>
+    </body>
+    </html>
