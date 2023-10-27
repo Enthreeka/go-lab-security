@@ -205,6 +205,40 @@
                 top: 28px;
                 cursor: pointer;
             }
+
+            .about {
+                padding: 5px;
+                border-radius: 5px;
+                background: #1C6EA4;
+                width: fit-content;
+                color: #fff;
+                margin-bottom: 10px;
+                cursor: pointer;
+            }
+
+            .avtor {
+                z-index: 150;
+                transform: translate(-50%, -50%);
+                color: #000;
+                position: fixed;
+                padding: 20px;
+                background: #ffacac;
+                z-index: 150;
+                left: 64%;
+                top: 8%;
+                display: none;
+            }
+
+            .avtor.active {
+                display: block;
+            }
+            .avtor .close-button {
+                position: absolute;
+                right: 5px;
+                top: 5px;
+                font-size: 20px;
+                cursor: pointer;
+            }
         </style>
     </head>
     <body>
@@ -213,6 +247,15 @@
 
         </span>
         <span class="close-button" id="closeModal">×</span>
+    </div>
+    <div class="avtor">
+        <div>
+            Автор программы Смирнов Никита
+        </div>
+        <div>
+            Вариант 17
+        </div>
+        <span class="close-button">×</span>
     </div>
     <div class="account-container">
         <h2>Мой аккаунт</h2>
@@ -223,6 +266,9 @@
             {{ else }}
             <p><strong>Роль:</strong> user</p>
             {{ end }}
+            <div class="about">
+                О программе
+            </div>
             <!-- Дополнительные сведения о пользователе можно добавить здесь -->
         </div>
         <form action="/logout" method="post">
@@ -304,6 +350,15 @@
     {{ end }}
 
     <script>
+        const aboutBtn = document.querySelector('.about')
+        const aboutBlock = document.querySelector('.avtor')
+        const aboutBlockClose = aboutBlock.querySelector('.close-button')
+        aboutBtn.addEventListener('click', function (e) {
+            aboutBlock.classList.add('active')
+        })
+        aboutBlockClose.addEventListener('click', function (e) {
+            aboutBlock.classList.remove('active')
+        })
         const alertBlock = document.querySelector('.alert')
         const alertBlockText = alertBlock.querySelector('span')
         const alertBlockClose = alertBlock.querySelector('.close-button')
@@ -353,19 +408,32 @@
 
             var formData = new FormData(this);
 
-                // fetch("/update", {
-                //     method: "POST",
-                //     body: formData
-                // })
-                // .then(response => response.json())
-                // .catch(error => {
-                //     alertBlock.classList.add('active')
-                //     alertBlockText.innerHTML = 'Ошибка при изменении пароля'
-                //     console.error("Ошибка при отправке запроса:", error);
-                //
-                // });
+            fetch("/update", {
+                method: "POST",
+                body: formData
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else if (response.status === 404) {
+                        alertBlock.classList.add('active');
+                        alertBlockText.innerHTML = 'Пароль не совпадает с паролем в базе данных';
+                    } else if (response.status === 400) {
+                        // Обработка ошибки 400 (Bad Request)
+                        alertBlock.classList.add('active');
+                        alertBlockText.innerHTML = 'Некорректный новый пароль';
+                    } else {
+                        // Обработка других ошибок
+                        alertBlock.classList.add('active');
+                        alertBlockText.innerHTML = 'Произошла ошибка при обновлении пароля';
+                    }
+                })
+                .catch(error => {
+                    // Обработка ошибок, которые могли произойти в процессе выполнения запроса
+                    // alertBlock.classList.add('active');
+                    // alertBlockText.innerHTML = 'Произошла ошибка при отправке запроса: ' + error;
+                });
         });
-
     </script>
     </body>
     </html>

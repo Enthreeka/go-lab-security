@@ -21,7 +21,7 @@
             padding: 20px;
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            position: relative; /* Добавляем позиционирование для крестика */
+            position: relative;
         }
 
         .login-container h2 {
@@ -44,7 +44,7 @@
             border-radius: 3px;
         }
 
-        .login-form .submit-button { /* Стили для кнопки "Отправить" */
+        .login-form .submit-button {
             background: #007BFF;
             color: #fff;
             padding: 10px;
@@ -54,7 +54,7 @@
             margin-top: 10px;
         }
 
-        /* Стили для модального окна */
+
         .modal {
             display: none;
             position: fixed;
@@ -76,7 +76,7 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
 
-        .modal-content .close-button { /* Стили для кнопки закрытия (крестика) */
+        .modal-content .close-button {
             position: absolute;
             top: 10px;
             right: 10px;
@@ -84,9 +84,39 @@
             color: #888;
             font-size: 20px;
         }
+
+        .alert {
+            background: red;
+            padding: 20px 30px 20px 20px;
+            border-radius: 10px;
+            position: relative;
+            position: fixed;
+            right: 10px;
+            bottom: 10px;
+            display: none;
+            z-index: 100;
+        }
+        .alert.active {
+            display: block;
+        }
+        .alert .close-button {
+            font-size: 36px;
+            line-height: 0px;
+            position: absolute;
+            right: 5px;
+            top: 28px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
+<div class="alert">
+        <span>
+
+        </span>
+    <span class="close-button" id="close-Modal">×</span>
+</div>
+
 <div class="login-container">
     <h2>Вход в аккаунт</h2>
     <form class="login-form" action="/login" method="POST">
@@ -146,6 +176,45 @@
 
         document.getElementById("passwordModal").style.display = "none";
     });
+
+    const loginForm = document.querySelector(".login-form");
+    const alertBlock = document.querySelector('.alert');
+    const alertBlockText = alertBlock.querySelector('span');
+
+    loginForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(this);
+
+        fetch("/login", {
+            method: "POST",
+            body: formData,
+        })
+            .then(response => {
+                if (response.ok) {
+                    // Успешный вход, перенаправляем пользователя на страницу аккаунта
+                    window.location.href = "/account";
+                } else if (response.status === 404) {
+                    // Обработка ошибки 404 (Not Found)
+                    alertBlock.classList.add('active');
+                    alertBlockText.innerHTML = 'Пользователь не найден';
+                } else if (response.status === 403) {
+                    // Обработка ошибки 403 (Forbidden)
+                    alertBlock.classList.add('active');
+                    alertBlockText.innerHTML = 'Ваш аккаунт заблокирован';
+                } else {
+                    // Обработка других ошибок
+                    alertBlock.classList.add('active');
+                    alertBlockText.innerHTML = 'Произошла ошибка при входе';
+                }
+            })
+            .catch(error => {
+                // Обработка ошибок, которые могли произойти в процессе выполнения запроса
+                alertBlock.classList.add('active');
+                alertBlockText.innerHTML = 'Произошла ошибка при отправке запроса: ' + error;
+            });
+    });
+
 </script>
 </body>
 </html>
