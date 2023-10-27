@@ -1,11 +1,11 @@
 {
- "count": 2,
+ "count": 4,
  "users": [
   {
    "id": 1,
    "username": "ADMIN",
    "password": "",
-   "session": "7ed6ed29-5f72-4f39-9455-55b005a94987",
+   "session": "ba63fd63-f62d-482a-a05d-51603c3eb4ee",
    "admin": true,
    "limit": false,
    "block": false
@@ -14,10 +14,28 @@
    "id": 2,
    "username": "temchik12",
    "password": "temchik12",
-   "session": "813d4260-bb40-42bd-98ed-d942e67878ff",
+   "session": "",
+   "admin": false,
+   "limit": true,
+   "block": false
+  },
+  {
+   "id": 3,
+   "username": "vovchikCsGo",
+   "password": "",
+   "session": "",
+   "admin": false,
+   "limit": false,
+   "block": true
+  },
+  {
+   "id": 4,
+   "username": "89506137350",
+   "password": "",
+   "session": "3e38a6d7-78b6-42ab-97bb-ed787b57100e",
    "admin": false,
    "limit": false,
    "block": false
   }
  ]
-}}
+}
