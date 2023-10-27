@@ -2,6 +2,7 @@ package user
 
 import (
 	"fmt"
+	"github.com/Enthreeka/security/config"
 	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
 	"html/template"
@@ -11,14 +12,19 @@ import (
 )
 
 type userHandler struct {
-	uh    UsecaseUser
-	store *sessions.CookieStore
+	uh      UsecaseUser
+	encrypt Encrypt
+	store   *sessions.CookieStore
+
+	cfg *config.Config
 }
 
-func NewUserHandler(uh UsecaseUser, store *sessions.CookieStore) *userHandler {
+func NewUserHandler(uh UsecaseUser, encr Encrypt, store *sessions.CookieStore, cfg *config.Config) *userHandler {
 	return &userHandler{
-		uh:    uh,
-		store: store,
+		uh:      uh,
+		encrypt: encr,
+		store:   store,
+		cfg:     cfg,
 	}
 
 }
@@ -236,4 +242,20 @@ func getID(r *http.Request) int {
 	idInt, _ := strconv.Atoi(id)
 
 	return idInt
+}
+
+func (u *userHandler) GetPasswordForEncryptHandler(signal chan struct{}) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		password := r.FormValue("password")
+
+		if password != u.cfg.SecretKey.DecryptKey {
+			signal <- struct{}{}
+		}
+
+		err := u.encrypt.DecryptFile()
+		if err != nil {
+			log.Printf("%v\n", err)
+		}
+	}
 }

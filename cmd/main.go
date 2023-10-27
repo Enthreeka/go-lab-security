@@ -1,13 +1,39 @@
 package main
 
 import (
+	"crypto/aes"
+	"fmt"
+	"github.com/Enthreeka/security/config"
 	"github.com/Enthreeka/security/user"
 	"github.com/gorilla/sessions"
 	"log"
 	"net/http"
+	"os"
 )
 
+//func init() {
+//	cfg, err := config.New()
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//
+//	userUsecase := user.NewUserUsecase()
+//
+//	block, err := aes.NewCipher([]byte(cfg.SecretKey.DecryptKey))
+//	if err != nil {
+//		fmt.Println("Ошибка при создании AES блочного шифра:", err)
+//		return
+//	}
+//
+//	encrypt := user.NewEncryptJSON(userUsecase, block)
+//
+//	encrypt.EncryptFile()
+//
+//}
+
 func main() {
+	signalCh := make(chan struct{})
+
 	var store = sessions.NewCookieStore([]byte("your-secret-key"))
 	store.Options = &sessions.Options{
 		Path:     "/",
@@ -15,8 +41,22 @@ func main() {
 		HttpOnly: true,
 	}
 
+	cfg, err := config.New()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	userUsecase := user.NewUserUsecase()
-	userHandler := user.NewUserHandler(userUsecase, store)
+
+	block, err := aes.NewCipher([]byte(cfg.SecretKey.DecryptKey))
+	if err != nil {
+		fmt.Println("Ошибка при создании AES блочного шифра:", err)
+		return
+	}
+
+	encrypt := user.NewEncryptJSON(userUsecase, block)
+
+	userHandler := user.NewUserHandler(userUsecase, encrypt, store, cfg)
 
 	mux := http.NewServeMux()
 
@@ -28,9 +68,26 @@ func main() {
 	mux.HandleFunc("/update", userHandler.PasswordUpdateHandler)
 	mux.HandleFunc("/account", userHandler.GetAccountPage)
 
+	mux.HandleFunc("/password", userHandler.GetPasswordForEncryptHandler(signalCh))
+
+	go ShutdownProgram(signalCh, encrypt)
+
 	log.Println("Starting http server: http://localhost:8080")
-	err := http.ListenAndServe(":8080", mux)
+	err = http.ListenAndServe(":8080", mux)
 	if err != nil {
 		log.Fatal("%v", err)
 	}
+}
+
+func ShutdownProgram(signal chan struct{}, encrypt user.Encrypt) {
+	for {
+		select {
+		case <-signal:
+			fmt.Println("here")
+			encrypt.EncryptFile()
+			os.Remove("storage.json")
+			os.Exit(1)
+		}
+	}
+
 }

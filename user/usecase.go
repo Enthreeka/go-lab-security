@@ -5,11 +5,13 @@ import (
 	"errors"
 	"io"
 	"os"
+	"sync"
 )
 
 type UsecaseUser interface {
 	Authentication(username string, password string, sessionId string) (*User, error)
 	StorageReader() (*Storage, error)
+	StorageWriter(user *User, storage *Storage) error
 	AdminTable(user *User) error
 	CreateUser(login string) (*Storage, error)
 	UpdatePassword(id int, currentPassword string, newPassword string) error
@@ -17,6 +19,7 @@ type UsecaseUser interface {
 }
 
 type userUsecase struct {
+	mu sync.RWMutex
 }
 
 func NewUserUsecase() UsecaseUser {
@@ -71,7 +74,7 @@ func (u *userUsecase) CreateUser(login string) (*Storage, error) {
 		Username: login,
 	}
 
-	err = u.storageWriter(user, storage)
+	err = u.StorageWriter(user, storage)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +135,7 @@ func (u *userUsecase) Authentication(username string, password string, sessionId
 			Session:  sessionId,
 		}
 
-		err := u.storageWriter(user, storage)
+		err := u.StorageWriter(user, storage)
 		if err != nil {
 			return nil, err
 		}
@@ -184,16 +187,21 @@ func (u *userUsecase) StorageReader() (*Storage, error) {
 	return users, nil
 }
 
-func (u *userUsecase) storageWriter(user *User, storage *Storage) error {
+func (u *userUsecase) StorageWriter(user *User, storage *Storage) error {
+	u.mu.Lock()
+	defer u.mu.Unlock()
+
 	file, err := os.OpenFile("storage.json", os.O_RDWR|os.O_CREATE, 0666)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	storage.Count += 1
-	user.ID = storage.Count
-	storage.User = append(storage.User, *user)
+	if user != nil {
+		storage.Count += 1
+		user.ID = storage.Count
+		storage.User = append(storage.User, *user)
+	}
 
 	storageByte, err := json.MarshalIndent(storage, "", " ")
 	if err != nil {
@@ -227,6 +235,9 @@ func (u *userUsecase) GetAccountPageBySession(sessionId string) (*User, *Storage
 }
 
 func (u *userUsecase) storageUpdate(storage *Storage) error {
+	u.mu.Lock()
+	defer u.mu.Unlock()
+
 	file, err := os.OpenFile("storage.json", os.O_RDWR|os.O_CREATE, 0666)
 	if err != nil {
 		return err
