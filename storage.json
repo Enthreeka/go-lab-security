@@ -1,11 +1,11 @@
 {
- "count": 2,
+ "count": 3,
  "users": [
   {
    "id": 1,
    "username": "ADMIN",
    "password": "",
-   "session": "7ed6ed29-5f72-4f39-9455-55b005a94987",
+   "session": "f5b84ba7-3945-49f5-80f8-811ca596cb46",
    "admin": true,
    "limit": false,
    "block": false
@@ -18,6 +18,15 @@
    "admin": false,
    "limit": false,
    "block": false
+  },
+  {
+   "id": 3,
+   "username": "123123",
+   "password": "",
+   "session": "",
+   "admin": false,
+   "limit": false,
+   "block": true
   }
  ]
 }

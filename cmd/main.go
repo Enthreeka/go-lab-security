@@ -9,6 +9,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 //func init() {
@@ -32,6 +34,9 @@ import (
 //}
 
 func main() {
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
+
 	signalCh := make(chan struct{})
 
 	var store = sessions.NewCookieStore([]byte("your-secret-key"))
@@ -71,6 +76,12 @@ func main() {
 	mux.HandleFunc("/password", userHandler.GetPasswordForEncryptHandler(signalCh))
 
 	go ShutdownProgram(signalCh, encrypt)
+
+	go func() {
+		<-signals
+
+		close(signals)
+	}()
 
 	log.Println("Starting http server: http://localhost:8080")
 	err = http.ListenAndServe(":8080", mux)
