@@ -100,7 +100,7 @@
     </form>
 </div>
 
-<!-- Модальное окно -->
+{{ if not .Check }}
 <div class="modal" id="passwordModal">
     <div class="modal-content">
         <form action="/password" method="POST">
@@ -111,6 +111,7 @@
         </form>
     </div>
 </div>
+{{ end }}
 
 <script>
 
@@ -133,23 +134,16 @@
             });
     }
 
-
-    // Открывает модальное окно при загрузке страницы
     window.addEventListener("load", function () {
         document.getElementById("passwordModal").style.display = "block";
     });
 
-    // Закрывает модальное окно при клике на крестик
     document.getElementById("closeModal").addEventListener("click", function () {
         document.getElementById("passwordModal").style.display = "none";
     });
 
-    // Закрывает модальное окно и отправляет данные после нажатия кнопки "Отправить"
     document.getElementById("submitModal").addEventListener("click", function () {
-        // Ваша логика обработки данных и отправки
-        // ...
 
-        // Закрываем модальное окно
         document.getElementById("passwordModal").style.display = "none";
     });
 </script>

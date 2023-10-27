@@ -19,14 +19,17 @@ type userHandler struct {
 	store   *sessions.CookieStore
 
 	cfg *config.Config
+
+	securityPasswordCheck map[string]bool
 }
 
 func NewUserHandler(uh UsecaseUser, encr Encrypt, store *sessions.CookieStore, cfg *config.Config) *userHandler {
 	return &userHandler{
-		uh:      uh,
-		encrypt: encr,
-		store:   store,
-		cfg:     cfg,
+		uh:                    uh,
+		encrypt:               encr,
+		store:                 store,
+		cfg:                   cfg,
+		securityPasswordCheck: make(map[string]bool),
 	}
 
 }
@@ -42,8 +45,8 @@ func (u *userHandler) PasswordUpdateHandler(w http.ResponseWriter, r *http.Reque
 		if err != nil {
 			log.Println(err)
 			if err.Error() == "input password in password in db not equal" {
-				//w.WriteHeader(http.StatusNotFound)
-				http.Error(w, "input password in password in db not equal", http.StatusNotFound)
+				w.WriteHeader(http.StatusNotFound)
+				//http.Error(w, "input password in password in db not equal", http.StatusNotFound)
 				return
 			} else if err.Error() == "new password not correct" {
 				w.WriteHeader(http.StatusBadRequest)
@@ -53,7 +56,9 @@ func (u *userHandler) PasswordUpdateHandler(w http.ResponseWriter, r *http.Reque
 			return
 		}
 
-		http.Redirect(w, r, "/account", http.StatusSeeOther)
+		//http.Redirect(w, r, "/account", http.StatusSeeOther)
+		w.Header().Set("Allow", http.MethodPost)
+		w.WriteHeader(http.StatusOK)
 	}
 }
 
@@ -227,7 +232,11 @@ func (u *userHandler) GetAccountPageHandler(w http.ResponseWriter, r *http.Reque
 }
 
 func (u *userHandler) GetLoginPageHandler(w http.ResponseWriter, r *http.Request) {
-	parseTemplate(w, "./templates/login.html", nil)
+	data := map[string]interface{}{
+		"Check": u.securityPasswordCheck,
+	}
+
+	parseTemplate(w, "./templates/login.html", data)
 }
 
 func parseTemplate(w http.ResponseWriter, path string, data any) {
@@ -259,5 +268,7 @@ func (u *userHandler) GetPasswordForEncryptHandler(signal chan os.Signal) http.H
 		if err != nil {
 			log.Printf("%v\n", err)
 		}
+
+		u.securityPasswordCheck["check"] = true
 	}
 }

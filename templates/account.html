@@ -183,12 +183,37 @@
                 width: 100%;
             }
 
-            /*.divTableCell input {*/
-            /*    width: 100%;*/
-            /*}*/
+            .alert {
+                background: red;
+                padding: 20px 30px 20px 20px;
+                border-radius: 10px;
+                position: relative;
+                position: fixed;
+                right: 10px;
+                bottom: 10px;
+                display: none;
+                z-index: 100;
+            }
+            .alert.active {
+                display: block;
+            }
+            .alert .close-button {
+                font-size: 36px;
+                line-height: 0px;
+                position: absolute;
+                right: 5px;
+                top: 28px;
+                cursor: pointer;
+            }
         </style>
     </head>
     <body>
+    <div class="alert">
+        <span>
+
+        </span>
+        <span class="close-button" id="closeModal">×</span>
+    </div>
     <div class="account-container">
         <h2>Мой аккаунт</h2>
         <div class="account-details">
@@ -206,7 +231,7 @@
 
         <div class="password-change">
             <h3>Изменить пароль</h3>
-            <form action="/update" method="post">
+            <form class="change-pass">
                 <input type="hidden" name="id" value="{{ .CurrentUser.ID }}">
                 <label for="currentPassword">Текущий пароль:</label>
                 <input type="password" id="currentPassword" name="currentPassword" >
@@ -279,6 +304,12 @@
     {{ end }}
 
     <script>
+        const alertBlock = document.querySelector('.alert')
+        const alertBlockText = alertBlock.querySelector('span')
+        const alertBlockClose = alertBlock.querySelector('.close-button')
+        alertBlockClose.addEventListener('click', function (e) {
+            alertBlock.classList.remove('active')
+        })
         function handleButtonClick(event) {
             event.preventDefault();
 
@@ -299,6 +330,7 @@
         }
 
         const postNewUser = document.querySelector('#postNewUser');
+        if(postNewUser)
         postNewUser.addEventListener('click', async function(event) {
             event.preventDefault();
 
@@ -311,45 +343,28 @@
                     body: formData,
                 })
             } catch (err) {
-                console.error(err); // Правильно: вывод ошибки в консоль
+                console.error(err);
             }
         });
 
+        const changePassForm = document.querySelector(".change-pass");
+        changePassForm.addEventListener("submit", function(event) {
+            event.preventDefault();
 
-        document.addEventListener("DOMContentLoaded", function() {
-            // Находим форму и элемент для сообщения об ошибке
-            var form = document.querySelector("form");
-            var errorMessage = document.getElementById("error-message");
+            var formData = new FormData(this);
 
-            // Добавляем обработчик отправки формы
-            form.addEventListener("submit", function(event) {
-                event.preventDefault();
-
-                var formData = new FormData(form);
-
-                // Отправляем данные на сервер с использованием AJAX
-                fetch("/update", {
-                    method: "POST",
-                    body: formData
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.error) {
-                            // Если получен ответ с ошибкой, отображаем сообщение об ошибке на странице
-                            errorMessage.textContent = data.error;
-                            errorMessage.style.display = "block"; // Отображаем элемент
-                        } else {
-                            // В случае успеха, скрываем сообщение об ошибке (если оно было видимым)
-                            errorMessage.style.display = "none";
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Ошибка при отправке запроса:", error);
-                    });
-            });
+                // fetch("/update", {
+                //     method: "POST",
+                //     body: formData
+                // })
+                // .then(response => response.json())
+                // .catch(error => {
+                //     alertBlock.classList.add('active')
+                //     alertBlockText.innerHTML = 'Ошибка при изменении пароля'
+                //     console.error("Ошибка при отправке запроса:", error);
+                //
+                // });
         });
-
-
 
     </script>
     </body>

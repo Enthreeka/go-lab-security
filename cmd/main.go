@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/aes"
+	"errors"
 	"fmt"
 	"github.com/Enthreeka/security/config"
 	"github.com/Enthreeka/security/user"
@@ -82,20 +83,6 @@ func main() {
 		Addr:    ":8080",
 		Handler: router,
 	}
-	//go ShutdownProgram(passwordCh, encrypt)
-	//
-	//go func() {
-	//	<-signals
-	//
-	//	_, cancel := context.WithCancel(context.Background())
-	//	defer cancel()
-	//
-	//	fmt.Println("here shoot")
-	//	encrypt.EncryptFile()
-	//	os.Remove("storage.json")
-	//
-	//	close(done)
-	//}()
 
 	go func() {
 		log.Println("Starting http server: http://localhost:8080")
@@ -110,8 +97,12 @@ func main() {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer func() {
-		encrypt.EncryptFile()
-		os.Remove("storage.json")
+		if _, err := os.Stat("storage.json"); !errors.Is(err, os.ErrNotExist) {
+			fmt.Println("delete storage.json")
+			encrypt.EncryptFile()
+			os.Remove("storage.json")
+		}
+
 		cancel()
 	}()
 
@@ -120,17 +111,3 @@ func main() {
 	}
 	log.Print("Server Exited Properly")
 }
-
-//func ShutdownProgram(passwordCh chan struct{}, encrypt user.Encrypt) {
-//	for {
-//		select {
-//		case <-passwordCh:
-//			//
-//			//fmt.Println("here")
-//			//encrypt.EncryptFile()
-//			//os.Remove("storage.json")
-//			os.Exit(1)
-//		}
-//	}
-//
-//}
