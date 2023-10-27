@@ -1,16 +1,19 @@
 package main
 
 import (
+	"context"
 	"crypto/aes"
 	"fmt"
 	"github.com/Enthreeka/security/config"
 	"github.com/Enthreeka/security/user"
+	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 //func init() {
@@ -34,10 +37,8 @@ import (
 //}
 
 func main() {
-	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
-
-	signalCh := make(chan struct{})
+	done := make(chan os.Signal, 1)
+	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 	var store = sessions.NewCookieStore([]byte("your-secret-key"))
 	store.Options = &sessions.Options{
@@ -63,42 +64,73 @@ func main() {
 
 	userHandler := user.NewUserHandler(userUsecase, encrypt, store, cfg)
 
-	mux := http.NewServeMux()
+	//mux := http.NewServeMux()
 
-	mux.HandleFunc("/", userHandler.GetLoginPageHandler)
-	mux.HandleFunc("/login", userHandler.LoginHandler)
-	mux.HandleFunc("/admin", userHandler.AdminHandler)
-	mux.HandleFunc("/user/create", userHandler.AdminCreateUserHandler)
-	mux.HandleFunc("/logout", userHandler.LogoutHandler)
-	mux.HandleFunc("/update", userHandler.PasswordUpdateHandler)
-	mux.HandleFunc("/account", userHandler.GetAccountPage)
+	router := mux.NewRouter()
 
-	mux.HandleFunc("/password", userHandler.GetPasswordForEncryptHandler(signalCh))
+	router.HandleFunc("/", userHandler.GetLoginPageHandler)
+	router.HandleFunc("/login", userHandler.LoginHandler)
+	router.HandleFunc("/admin", userHandler.AdminHandler)
+	router.HandleFunc("/user/create", userHandler.AdminCreateUserHandler)
+	router.HandleFunc("/logout", userHandler.LogoutHandler)
+	router.HandleFunc("/update", userHandler.PasswordUpdateHandler)
+	router.HandleFunc("/account", userHandler.GetAccountPage)
 
-	go ShutdownProgram(signalCh, encrypt)
+	router.HandleFunc("/password", userHandler.GetPasswordForEncryptHandler(done))
+
+	srv := &http.Server{
+		Addr:    ":8080",
+		Handler: router,
+	}
+	//go ShutdownProgram(passwordCh, encrypt)
+	//
+	//go func() {
+	//	<-signals
+	//
+	//	_, cancel := context.WithCancel(context.Background())
+	//	defer cancel()
+	//
+	//	fmt.Println("here shoot")
+	//	encrypt.EncryptFile()
+	//	os.Remove("storage.json")
+	//
+	//	close(done)
+	//}()
 
 	go func() {
-		<-signals
+		log.Println("Starting http server: http://localhost:8080")
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen: %s\n", err)
+		}
+	}()
+	log.Print("Server Started")
 
-		close(signals)
+	<-done
+	log.Print("Server Stopped")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer func() {
+		encrypt.EncryptFile()
+		os.Remove("storage.json")
+		cancel()
 	}()
 
-	log.Println("Starting http server: http://localhost:8080")
-	err = http.ListenAndServe(":8080", mux)
-	if err != nil {
-		log.Fatal("%v", err)
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatalf("Server Shutdown Failed:%+v", err)
 	}
+	log.Print("Server Exited Properly")
 }
 
-func ShutdownProgram(signal chan struct{}, encrypt user.Encrypt) {
-	for {
-		select {
-		case <-signal:
-			fmt.Println("here")
-			encrypt.EncryptFile()
-			os.Remove("storage.json")
-			os.Exit(1)
-		}
-	}
-
-}
+//func ShutdownProgram(passwordCh chan struct{}, encrypt user.Encrypt) {
+//	for {
+//		select {
+//		case <-passwordCh:
+//			//
+//			//fmt.Println("here")
+//			//encrypt.EncryptFile()
+//			//os.Remove("storage.json")
+//			os.Exit(1)
+//		}
+//	}
+//
+//}

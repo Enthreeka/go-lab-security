@@ -8,7 +8,9 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
+	"syscall"
 )
 
 type userHandler struct {
@@ -244,13 +246,13 @@ func getID(r *http.Request) int {
 	return idInt
 }
 
-func (u *userHandler) GetPasswordForEncryptHandler(signal chan struct{}) http.HandlerFunc {
+func (u *userHandler) GetPasswordForEncryptHandler(signal chan os.Signal) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		password := r.FormValue("password")
 
 		if password != u.cfg.SecretKey.DecryptKey {
-			signal <- struct{}{}
+			signal <- syscall.SIGINT
 		}
 
 		err := u.encrypt.DecryptFile()
