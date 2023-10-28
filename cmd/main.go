@@ -17,26 +17,6 @@ import (
 	"time"
 )
 
-//func init() {
-//	cfg, err := config.New()
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//
-//	userUsecase := user.NewUserUsecase()
-//
-//	block, err := aes.NewCipher([]byte(cfg.SecretKey.DecryptKey))
-//	if err != nil {
-//		fmt.Println("Ошибка при создании AES блочного шифра:", err)
-//		return
-//	}
-//
-//	encrypt := user.NewEncryptJSON(userUsecase, block)
-//
-//	encrypt.EncryptFile()
-//
-//}
-
 func main() {
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
@@ -64,8 +44,6 @@ func main() {
 	encrypt := user.NewEncryptJSON(userUsecase, block)
 
 	userHandler := user.NewUserHandler(userUsecase, encrypt, store, cfg)
-
-	//mux := http.NewServeMux()
 
 	router := mux.NewRouter()
 

@@ -46,7 +46,6 @@ func (u *userHandler) PasswordUpdateHandler(w http.ResponseWriter, r *http.Reque
 			log.Println(err)
 			if err.Error() == "input password in password in db not equal" {
 				w.WriteHeader(http.StatusNotFound)
-				//http.Error(w, "input password in password in db not equal", http.StatusNotFound)
 				return
 			} else if err.Error() == "new password not correct" {
 				w.WriteHeader(http.StatusBadRequest)
@@ -56,7 +55,6 @@ func (u *userHandler) PasswordUpdateHandler(w http.ResponseWriter, r *http.Reque
 			return
 		}
 
-		//http.Redirect(w, r, "/account", http.StatusSeeOther)
 		w.Header().Set("Allow", http.MethodPost)
 		w.WriteHeader(http.StatusOK)
 	}
@@ -108,8 +106,6 @@ func (u *userHandler) AdminCreateUserHandler(w http.ResponseWriter, r *http.Requ
 		}
 
 		u.GetAccountPageHandler(w, r, data)
-
-		//http.Redirect(w, r, "/account", http.StatusSeeOther)
 	}
 }
 
@@ -185,25 +181,7 @@ func (u *userHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		session.Values["sessionID"] = sessionId
 		session.Save(r, w)
 
-		//storage, err := u.uh.StorageReader()
-		//if err != nil {
-		//	log.Println(err)
-		//}
-		//
-		//data := struct {
-		//	CurrentUser *User
-		//	AllUsers    *Storage
-		//}{
-		//	CurrentUser: user,
-		//	AllUsers:    storage,
-		//}
-		//if data.CurrentUser.Admin {
-		//}
-
 		http.Redirect(w, r, "/account", http.StatusSeeOther)
-		//if user != nil {
-		//	u.GetAccountPageHandler(w, r, data)
-		//}
 	}
 }
 

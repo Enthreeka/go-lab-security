@@ -147,12 +147,6 @@ func (u *userUsecase) Authentication(username string, password string, sessionId
 		for i, user := range storage.User {
 			if user.Username == username && user.Password == password {
 
-				//user.Session = sessionId
-				//err = u.storageWriter(&user, storage)
-				//if err != nil {
-				//	return nil, err
-				//}
-
 				storage.User[i].Session = sessionId
 				err = u.storageUpdate(storage)
 				if err != nil {
