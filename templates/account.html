@@ -318,6 +318,7 @@
             </div>
             <div class="divTableBody">
                 {{ range .AllUsers.User }}
+                {{ if not .Admin}}
                 <form class="divTableRow" action="/admin" method="post">
                     <div class="divTableCell">
                         <input readonly name="id" value="{{ .ID }}">
@@ -342,6 +343,7 @@
                         </button>
                     </div>
                 </form>
+                {{ end }}
                 {{ end }}
             </div>
         </div>
