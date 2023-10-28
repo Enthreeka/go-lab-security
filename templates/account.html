@@ -183,12 +183,80 @@
                 width: 100%;
             }
 
-            /*.divTableCell input {*/
-            /*    width: 100%;*/
-            /*}*/
+            .alert {
+                background: red;
+                padding: 20px 30px 20px 20px;
+                border-radius: 10px;
+                position: relative;
+                position: fixed;
+                right: 10px;
+                bottom: 10px;
+                display: none;
+                z-index: 100;
+            }
+            .alert.active {
+                display: block;
+            }
+            .alert .close-button {
+                font-size: 36px;
+                line-height: 0px;
+                position: absolute;
+                right: 5px;
+                top: 28px;
+                cursor: pointer;
+            }
+
+            .about {
+                padding: 5px;
+                border-radius: 5px;
+                background: #1C6EA4;
+                width: fit-content;
+                color: #fff;
+                margin-bottom: 10px;
+                cursor: pointer;
+            }
+
+            .avtor {
+                z-index: 150;
+                transform: translate(-50%, -50%);
+                color: #000;
+                position: fixed;
+                padding: 20px;
+                background: #ffacac;
+                z-index: 150;
+                left: 64%;
+                top: 8%;
+                display: none;
+            }
+
+            .avtor.active {
+                display: block;
+            }
+            .avtor .close-button {
+                position: absolute;
+                right: 5px;
+                top: 5px;
+                font-size: 20px;
+                cursor: pointer;
+            }
         </style>
     </head>
     <body>
+    <div class="alert">
+        <span>
+
+        </span>
+        <span class="close-button" id="closeModal">×</span>
+    </div>
+    <div class="avtor">
+        <div>
+            Автор программы Смирнов Никита
+        </div>
+        <div>
+            Вариант 17
+        </div>
+        <span class="close-button">×</span>
+    </div>
     <div class="account-container">
         <h2>Мой аккаунт</h2>
         <div class="account-details">
@@ -198,6 +266,9 @@
             {{ else }}
             <p><strong>Роль:</strong> user</p>
             {{ end }}
+            <div class="about">
+                О программе
+            </div>
             <!-- Дополнительные сведения о пользователе можно добавить здесь -->
         </div>
         <form action="/logout" method="post">
@@ -206,7 +277,7 @@
 
         <div class="password-change">
             <h3>Изменить пароль</h3>
-            <form action="/update" method="post">
+            <form class="change-pass">
                 <input type="hidden" name="id" value="{{ .CurrentUser.ID }}">
                 <label for="currentPassword">Текущий пароль:</label>
                 <input type="password" id="currentPassword" name="currentPassword" >
@@ -247,6 +318,7 @@
             </div>
             <div class="divTableBody">
                 {{ range .AllUsers.User }}
+                {{ if not .Admin }}
                 <form class="divTableRow" action="/admin" method="post">
                     <div class="divTableCell">
                         <input readonly name="id" value="{{ .ID }}">
@@ -272,6 +344,7 @@
                     </div>
                 </form>
                 {{ end }}
+                {{ end }}
             </div>
         </div>
     </div>
@@ -279,6 +352,21 @@
     {{ end }}
 
     <script>
+        const aboutBtn = document.querySelector('.about')
+        const aboutBlock = document.querySelector('.avtor')
+        const aboutBlockClose = aboutBlock.querySelector('.close-button')
+        aboutBtn.addEventListener('click', function (e) {
+            aboutBlock.classList.add('active')
+        })
+        aboutBlockClose.addEventListener('click', function (e) {
+            aboutBlock.classList.remove('active')
+        })
+        const alertBlock = document.querySelector('.alert')
+        const alertBlockText = alertBlock.querySelector('span')
+        const alertBlockClose = alertBlock.querySelector('.close-button')
+        alertBlockClose.addEventListener('click', function (e) {
+            alertBlock.classList.remove('active')
+        })
         function handleButtonClick(event) {
             event.preventDefault();
 
@@ -299,6 +387,7 @@
         }
 
         const postNewUser = document.querySelector('#postNewUser');
+        if(postNewUser)
         postNewUser.addEventListener('click', async function(event) {
             event.preventDefault();
 
@@ -311,46 +400,39 @@
                     body: formData,
                 })
             } catch (err) {
-                console.error(err); // Правильно: вывод ошибки в консоль
+                console.error(err);
             }
         });
 
+        const changePassForm = document.querySelector(".change-pass");
+        changePassForm.addEventListener("submit", function(event) {
+            event.preventDefault();
 
-        document.addEventListener("DOMContentLoaded", function() {
-            // Находим форму и элемент для сообщения об ошибке
-            var form = document.querySelector("form");
-            var errorMessage = document.getElementById("error-message");
+            var formData = new FormData(this);
 
-            // Добавляем обработчик отправки формы
-            form.addEventListener("submit", function(event) {
-                event.preventDefault();
-
-                var formData = new FormData(form);
-
-                // Отправляем данные на сервер с использованием AJAX
-                fetch("/update", {
-                    method: "POST",
-                    body: formData
+            fetch("/update", {
+                method: "POST",
+                body: formData
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else if (response.status === 404) {
+                        alertBlock.classList.add('active');
+                        alertBlockText.innerHTML = 'Пароль не совпадает с паролем в базе данных';
+                    } else if (response.status === 400) {
+                        // Обработка ошибки 400 (Bad Request)
+                        alertBlock.classList.add('active');
+                        alertBlockText.innerHTML = 'Некорректный новый пароль';
+                    } else {
+                        // Обработка других ошибок
+                        alertBlock.classList.add('active');
+                        alertBlockText.innerHTML = 'Произошла ошибка при обновлении пароля';
+                    }
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.error) {
-                            // Если получен ответ с ошибкой, отображаем сообщение об ошибке на странице
-                            errorMessage.textContent = data.error;
-                            errorMessage.style.display = "block"; // Отображаем элемент
-                        } else {
-                            // В случае успеха, скрываем сообщение об ошибке (если оно было видимым)
-                            errorMessage.style.display = "none";
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Ошибка при отправке запроса:", error);
-                    });
-            });
+                .catch(error => {
+                });
         });
-
-
-
     </script>
     </body>
     </html>

@@ -21,8 +21,9 @@ type User struct {
 	Block bool `json:"block"`
 }
 
+// IsPasswordCorrect - 17. Наличие букв, знаков препинания и знаков арифметических операций.
 func IsPasswordCorrect(password string) bool {
-	regex := regexp.MustCompile(`[a-zA-Zа-яА-Я+\-*/%]`)
+	regex := regexp.MustCompile(`[a-zA-Z]+.*[\p{P}\p{S}]`)
 
 	if !regex.MatchString(password) {
 		return false
