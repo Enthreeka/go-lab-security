@@ -135,6 +135,7 @@ func (u *userHandler) AdminHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Println(err)
+			return
 		}
 
 		user := updateUser(idInt, block, limit)
@@ -147,6 +148,7 @@ func (u *userHandler) AdminHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Println(err)
+			return
 		}
 	}
 }
@@ -164,6 +166,7 @@ func (u *userHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			if err.Error() == "not found" {
 				http.Error(w, "user not found", http.StatusNotFound)
+				return
 			}
 			log.Println(err)
 		}
